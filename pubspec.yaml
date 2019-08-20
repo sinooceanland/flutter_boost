@@ -11,9 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  xservice_kit_androidx:
+  xservice_kit:
     git:
-      url: 'https://github.com/tangtang-feng/xservice_kit.git'
+      url: 'https://github.com/sinooceanland/xservice_kit.git'
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec

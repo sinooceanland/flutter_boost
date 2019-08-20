@@ -23,9 +23,9 @@
  */
 
  import 'dart:async';
- import 'package:xservice_kit_androidx/foundation_ext/foundation_ext.dart';
- import 'package:xservice_kit_androidx/servicet_emplate.dart';
- import 'package:xservice_kit_androidx/service_gateway.dart';
+ import 'package:xservice_kit/foundation_ext/foundation_ext.dart';
+ import 'package:xservice_kit/servicet_emplate.dart';
+ import 'package:xservice_kit/service_gateway.dart';
  
  class NavigationService {
  
