@@ -23,12 +23,11 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_boost/AIOService/NavigationService/service/NavigationService.dart';
-import 'package:flutter_boost/container/boost_container.dart';
-import 'package:flutter_boost/container/container_coordinator.dart';
-import 'package:flutter_boost/flutter_boost.dart';
-import 'package:flutter_boost/support/logger.dart';
-import 'package:flutter_boost/container/navigator_observer.dart';
+import 'boost_container.dart';
+import 'container_coordinator.dart';
+import '../flutter_boost.dart';
+import '../support/logger.dart';
+
 enum ContainerOperation { Push, Onstage, Pop, Remove }
 
 typedef BoostContainerObserver = void Function(
@@ -100,8 +99,6 @@ class ContainerManagerState extends State<BoostContainerManager> {
     assert(widget.initNavigator != null);
     _onstage = BoostContainer.copy(widget.initNavigator);
 
-    FlutterBoost.containerManager.navigatorObserver.addBoostNavigatorObserver(NavigatorCanPopObserver());
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {});
     });
@@ -137,7 +134,12 @@ class ContainerManagerState extends State<BoostContainerManager> {
 
   void _onShownContainerChanged(String old, String now) {
     Logger.log('onShownContainerChanged old:$old now:$now');
-    NavigationService.onShownContainerChanged(now, old, <dynamic, dynamic>{});
+
+    Map<String, dynamic> properties = new Map<String, dynamic>();
+    properties['newName'] = now;
+    properties['oldName'] = old;
+
+    FlutterBoost.singleton.channel.invokeMethod('onShownContainerChanged',properties);
   }
 
   void _refreshOverlayEntries() {
@@ -225,7 +227,7 @@ class ContainerManagerState extends State<BoostContainerManager> {
           .observersOf<BoostContainerObserver>()) {
         observer(ContainerOperation.Onstage, _onstage.settings);
       }
-      Logger.log('ContainerObserver didOnstage');
+      Logger.log('ContainerObserver#2 didOnstage');
     } else {
       pushContainer(settings);
     }
@@ -267,7 +269,7 @@ class ContainerManagerState extends State<BoostContainerManager> {
         .observersOf<BoostContainerObserver>()) {
       observer(ContainerOperation.Push, _onstage.settings);
     }
-    Logger.log('ContainerObserver didPush');
+    Logger.log('ContainerObserver#2 didPush');
   }
 
   void pop() {
@@ -283,7 +285,7 @@ class ContainerManagerState extends State<BoostContainerManager> {
       observer(ContainerOperation.Pop, old.settings);
     }
 
-    Logger.log('ContainerObserver didPop');
+    Logger.log('ContainerObserver#2 didPop');
   }
 
   void remove(String uniqueId) {
@@ -304,7 +306,7 @@ class ContainerManagerState extends State<BoostContainerManager> {
           observer(ContainerOperation.Remove, container.settings);
         }
 
-        Logger.log('ContainerObserver didRemove');
+        Logger.log('ContainerObserver#2 didRemove');
       }
     }
 

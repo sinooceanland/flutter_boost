@@ -5,12 +5,16 @@
   <a href="https://mp.weixin.qq.com/s?__biz=MzU4MDUxOTI5NA==&mid=2247484367&idx=1&sn=fcbc485f068dae5de9f68d52607ea08f&chksm=fd54d7deca235ec86249a9e3714ec18be8b2d6dc580cae19e4e5113533a6c5b44dfa5813c4c3&scene=0&subscene=131&clicktime=1551942425&ascene=7&devicetype=android-28&version=2700033b&nettype=ctnet&abtest_cookie=BAABAAoACwASABMABAAklx4AVpkeAMSZHgDWmR4AAAA%3D&lang=zh_CN&pass_ticket=1qvHqOsbLBHv3wwAcw577EHhNjg6EKXqTfnOiFbbbaw%3D&wx_header=1">中文介绍</a>
 </p>
 
+# Release Note
+
+Please checkout the release note for the latest 0.1.50 to see changes [0.1.50 release note](https://github.com/alibaba/flutter_boost/releases)
+
 # FlutterBoost
 A next-generation Flutter-Native hybrid solution. FlutterBoost is a Flutter plugin which enables hybrid integration of Flutter for your existing native apps with minimum efforts.The philosophy of FlutterBoost is to use Flutter as easy as using a WebView. Managing Native pages and Flutter pages at the same time is non-trivial in an existing App. FlutterBoost takes care of page resolution for you. The only thing you need to care about is the name of the page(usually could be an URL). 
 <a name="bf647454"></a>
 
 # Prerequisites
-You need to add Flutter to your project before moving on.
+You need to add Flutter to your project before moving on.The version of the flutter SDK requires v1.5.4-hotfixes, or it will compile error.
 
 # Getting Started
 
@@ -20,15 +24,16 @@ You need to add Flutter to your project before moving on.
 Open you pubspec.yaml and add the following line to dependencies:
 
 ```java
-flutter_boost: ^0.0.415
+flutter_boost: ^0.1.52
 ```
 
 or you could rely directly on a Github project tag, for example(recommended)
+
 ```java
 flutter_boost:
         git:
             url: 'https://github.com/alibaba/flutter_boost.git'
-            ref: '0.0.415'
+            ref: '0.1.52'
 ```
 
 
@@ -55,8 +60,6 @@ class _MyAppState extends State<MyApp> {
       'sample://secondPage': (pageName, params, _) => SecondRouteWidget(),
     });
 
-    ///query current top page and load it
-    FlutterBoost.handleOnStartPage();
   }
 
   @override
@@ -130,7 +133,7 @@ Initialize FlutterBoost with FLBPlatform at the beginning of your App.
 
 ```objc
  [FlutterBoostPlugin.sharedInstance startFlutterWithPlatform:router
-                                                        onStart:^(FlutterViewController *fvc) {
+                                                        onStart:^(id engine) {
                                                             
                                                         }];
 ```
@@ -145,36 +148,40 @@ public class MyApplication extends FlutterApplication {
     public void onCreate() {
         super.onCreate();
         FlutterBoostPlugin.init(new IPlatform() {
-            @Override
+
+        @Override
             public Application getApplication() {
                 return MyApplication.this;
             }
 
-            /**
-             * get the main activity, this activity should always at the bottom of task stack.
-             */
-            @Override
-            public Activity getMainActivity() {
-                return MainActivity.sRef.get();
-            }
-
             @Override
             public boolean isDebug() {
-                return false;
-            }
-
-            /**
-             * start a new activity from flutter page, you may need a activity router.
-             */
-            @Override
-            public boolean startActivity(Context context, String url, int requestCode) {
-                return PageRouter.openPageByUrl(context,url,requestCode);
+                return true;
             }
 
             @Override
-            public Map getSettings() {
-                return null;
+            public void openContainer(Context context, String url, Map<String, Object> urlParams, int requestCode, Map<String, Object> exts) {
+            		//native open url 
             }
+
+            @Override
+            public IFlutterEngineProvider engineProvider() {
+                return new BoostEngineProvider(){
+                    @Override
+                    public BoostFlutterEngine createEngine(Context context) {
+                        return new BoostFlutterEngine(context, new DartExecutor.DartEntrypoint(
+                                context.getResources().getAssets(),
+                                FlutterMain.findAppBundlePath(context),
+                                "main"),"/");
+                    }
+                };
+            }
+
+            @Override
+            public int whenEngineStart() {
+                return ANY_ACTIVITY_CREATED;
+            }
+
         });
     }
 ```
@@ -201,21 +208,16 @@ Android
 ```java
 public class FlutterPageActivity extends BoostFlutterActivity {
 
+
     @Override
-    public void onRegisterPlugins(PluginRegistry registry) {
-        //register flutter plugins
-        GeneratedPluginRegistrant.registerWith(registry);
+    public String getContainerUrl() {
+     	//specify the page name register in FlutterBoost
+       return "sample://firstPage";
     }
 
     @Override
-    public String getContainerName() {
-        //specify the page name register in FlutterBoost
-        return "sample://firstPage";
-    }
-
-    @Override
-    public Map getContainerParams() {
-        //params of the page
+    public Map getContainerUrlParams() {
+    	//params of the page
         Map<String,String> params = new HashMap<>();
         params.put("key","value");
         return params;
@@ -226,21 +228,17 @@ public class FlutterPageActivity extends BoostFlutterActivity {
 or
 
 ```java
+
 public class FlutterFragment extends BoostFlutterFragment {
-    @Override
-    public void onRegisterPlugins(PluginRegistry registry) {
-        GeneratedPluginRegistrant.registerWith(registry);
+	  @Override
+     public String getContainerUrl() {
+        return "flutterFragment";
     }
 
     @Override
-    public String getContainerName() {
-        return "sample://firstPage";
-    }
-
-    @Override
-    public Map getContainerParams() {
+     public Map getContainerUrlParams() {
         Map<String,String> params = new HashMap<>();
-        params.put("key","value");
+        params.put("tag",getArguments().getString("tag"));
         return params;
     }
 }
@@ -252,13 +250,18 @@ public class FlutterFragment extends BoostFlutterFragment {
 Dart
 
 ```objc
- FlutterBoost.singleton.openPage("pagename", {}, true);
+
+FlutterBoost.singleton
+                .open("pagename")
+
 ```
 
 ## Use Flutter Boost to close a page in dart code.
 
 ```objc
-FlutterBoost.singleton.closePageForContext(context);
+
+FlutterBoost.singleton.close(uniqueId);
+
 ```
 
 # Running the Demo
@@ -267,6 +270,14 @@ Please see the example for details.
 
 # License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+
+# Problem feedback group（ dingding group)
+
+<img width="200" src="https://img.alicdn.com/tfs/TB1JSzVeYY1gK0jSZTEXXXDQVXa-892-1213.jpg">
+
+
+
 
 ## 关于我们
 阿里巴巴-闲鱼技术是国内最早也是最大规模线上运行Flutter的团队。
