@@ -28,7 +28,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.view.ViewCompat;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +37,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.core.view.ViewCompat;
 
 import com.idlefish.flutterboost.interfaces.IStateListener;
 
@@ -73,24 +74,24 @@ public class BoostFlutterView extends FrameLayout {
 
     private final io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener mOnFirstFrameRenderedListener =
             new io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener() {
-        @Override
-        public void onFirstFrameRendered() {
-            Debuger.log("BoostFlutterView onFirstFrameRendered");
+                @Override
+                public void onFirstFrameRendered() {
+                    Debuger.log("BoostFlutterView onFirstFrameRendered");
 
-            if(mRenderingProgressCover != null && mRenderingProgressCover.getParent() != null) {
-                ((ViewGroup)mRenderingProgressCover.getParent()).removeView(mRenderingProgressCover);
-            }
+                    if(mRenderingProgressCover != null && mRenderingProgressCover.getParent() != null) {
+                        ((ViewGroup)mRenderingProgressCover.getParent()).removeView(mRenderingProgressCover);
+                    }
 
-            if(mNeedSnapshotWhenDetach) {
-                mSnapshot.dismissSnapshot(BoostFlutterView.this);
-            }
+                    if(mNeedSnapshotWhenDetach) {
+                        mSnapshot.dismissSnapshot(BoostFlutterView.this);
+                    }
 
-            final Object[] listeners = mFirstFrameRenderedListeners.toArray();
-            for (Object obj : listeners) {
-                ((OnFirstFrameRenderedListener) obj).onFirstFrameRendered(BoostFlutterView.this);
-            }
-        }
-    };
+                    final Object[] listeners = mFirstFrameRenderedListeners.toArray();
+                    for (Object obj : listeners) {
+                        ((OnFirstFrameRenderedListener) obj).onFirstFrameRendered(BoostFlutterView.this);
+                    }
+                }
+            };
 
     private final ViewTreeObserver.OnGlobalLayoutListener mGlobalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
         @Override

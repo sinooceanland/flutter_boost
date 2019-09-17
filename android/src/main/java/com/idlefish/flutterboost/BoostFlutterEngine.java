@@ -3,10 +3,11 @@ package com.idlefish.flutterboost;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.Surface;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.idlefish.flutterboost.interfaces.IContainerRecord;
 import com.idlefish.flutterboost.interfaces.IStateListener;
@@ -20,7 +21,6 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
-import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.platform.PlatformViewRegistry;
@@ -334,12 +334,12 @@ public class BoostFlutterEngine extends FlutterEngine {
         }
 
         @Override
-        public void addOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
+        public void addOnFirstFrameRenderedListener(@NonNull BoostFlutterView.OnFirstFrameRenderedListener listener) {
             Debuger.exception("should never called!");
         }
 
         @Override
-        public void removeOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
+        public void removeOnFirstFrameRenderedListener(@NonNull BoostFlutterView.OnFirstFrameRenderedListener listener) {
             Debuger.exception("should never called!");
         }
 
