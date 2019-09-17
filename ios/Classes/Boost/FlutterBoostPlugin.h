@@ -25,6 +25,9 @@
 
 #import "FLBPlatform.h"
 #import "FLBTypes.h"
+#import "FLBFlutterApplicationInterface.h" // 为了导出 application
+
+@protocol FLBFlutterApplicationInterface;
 
 @interface FlutterBoostPlugin : NSObject<FlutterPlugin>
 #pragma mark - Initializer
@@ -39,6 +42,8 @@
 - (BOOL)isRunning;
 
 - (FlutterViewController *)currentViewController;
+
+- (id<FLBFlutterApplicationInterface>)application;
 
 #pragma mark - broadcast event to/from flutter
 - (void)sendEvent:(NSString *)eventName
