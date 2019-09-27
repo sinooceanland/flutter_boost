@@ -55,7 +55,6 @@ public class BoostFlutterView extends FrameLayout {
     private BoostFlutterEngine mFlutterEngine;
 
     private XFlutterView mFlutterView;
-
     private PlatformPlugin mPlatformPlugin;
 
     private Bundle mArguments;
@@ -116,7 +115,6 @@ public class BoostFlutterView extends FrameLayout {
         if (mArguments == null) {
             mArguments = new Bundle();
         }
-
         mPlatformPlugin = new PlatformPlugin((Activity) getContext(), mFlutterEngine.getPlatformChannel());
 
         mFlutterView = new XFlutterView(getContext(), getRenderMode(), getTransparencyMode());
@@ -214,7 +212,6 @@ public class BoostFlutterView extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mPlatformPlugin.onPostResume();
         ViewCompat.requestApplyInsets(this);
         getViewTreeObserver().addOnGlobalLayoutListener(mGlobalLayoutListener);
     }
@@ -294,14 +291,12 @@ public class BoostFlutterView extends FrameLayout {
         }
     }
 
+
     public void onDestroy() {
         Debuger.log("BoostFlutterView onDestroy");
 
         mFlutterView.removeOnFirstFrameRenderedListener(mOnFirstFrameRenderedListener);
-        AccessibilityBridge bridge=mFlutterView.getAccessibilityBridge();
-        if(bridge!=null){
-            bridge.release();
-        }
+        mFlutterView.release();
     }
 
     //混合栈的返回和原来Flutter的返回逻辑不同

@@ -24,7 +24,7 @@ You need to add Flutter to your project before moving on.The version of the flut
 Open you pubspec.yaml and add the following line to dependencies:
 
 ```java
-flutter_boost: ^0.1.52
+flutter_boost: ^0.1.54
 ```
 
 or you could rely directly on a Github project tag, for example(recommended)
@@ -33,7 +33,7 @@ or you could rely directly on a Github project tag, for example(recommended)
 flutter_boost:
         git:
             url: 'https://github.com/alibaba/flutter_boost.git'
-            ref: '0.1.52'
+            ref: '0.1.54'
 ```
 
 
@@ -86,16 +86,16 @@ Use FLBFlutterAppDelegate as the superclass of your AppDelegate
 Implement FLBPlatform protocol methods for your App.
 
 ```objc
-@interface DemoRouter : NSObject<FLBPlatform>
+@interface PlatformRouterImp : NSObject<FLBPlatform>
 
 @property (nonatomic,strong) UINavigationController *navigationController;
 
-+ (DemoRouter *)sharedRouter;
++ (PlatformRouterImp *)sharedRouter;
 
 @end
 
 
-@implementation DemoRouter
+@implementation PlatformRouterImp
 
 - (void)openPage:(NSString *)name
           params:(NSDictionary *)params
@@ -129,11 +129,12 @@ Implement FLBPlatform protocol methods for your App.
 
 
 
-Initialize FlutterBoost with FLBPlatform at the beginning of your App.
+Initialize FlutterBoost with FLBPlatform at the beginning of your App, such as AppDelegate.
 
 ```objc
+ PlatformRouterImp *router = [PlatformRouterImp new];
  [FlutterBoostPlugin.sharedInstance startFlutterWithPlatform:router
-                                                        onStart:^(id engine) {
+                                                        onStart:^(FlutterEngine *engine) {
                                                             
                                                         }];
 ```
@@ -201,6 +202,23 @@ iOS
  FLBFlutterViewContainer *vc = FLBFlutterViewContainer.new;
         [vc setName:name params:params];
         [self.navigationController presentViewController:vc animated:animated completion:^{}];
+```
+However, in this way, you cannot get the page data result after the page finished. We suggest you implement the platform page router like the way mentioned above. And finally open/close the VC as following:
+```objc
+//push the page
+[FlutterBoostPlugin open:@"first" urlParams:@{kPageCallBackId:@"MycallbackId#1"} exts:@{@"animated":@(YES)} onPageFinished:^(NSDictionary *result) {
+        NSLog(@"call me when page finished, and your result is:%@", result);
+    } completion:^(BOOL f) {
+        NSLog(@"page is opened");
+    }];
+//prsent the page
+[FlutterBoostPlugin open:@"second" urlParams:@{@"present":@(YES),kPageCallBackId:@"MycallbackId#2"} exts:@{@"animated":@(YES)} onPageFinished:^(NSDictionary *result) {
+        NSLog(@"call me when page finished, and your result is:%@", result);
+    } completion:^(BOOL f) {
+        NSLog(@"page is presented");
+    }];
+//close the page
+[FlutterBoostPlugin close:yourUniqueId result:yourdata exts:exts completion:nil];
 ```
 
 Android
